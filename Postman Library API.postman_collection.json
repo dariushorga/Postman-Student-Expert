@@ -391,19 +391,18 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{BaseUrl}}/books//:id",
+          "raw": "{{BaseUrl}}/books/:id",
           "host": [
             "{{BaseUrl}}"
           ],
           "path": [
             "books",
-            "",
             ":id"
           ],
           "variable": [
             {
               "key": "id",
-              "value": "29cd820f-82f9-4b45-a7f4-0924111b5b89"
+              "value": "{{id}}"
             }
           ]
         }
