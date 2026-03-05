@@ -7,7 +7,7 @@
   },
   "item": [
     {
-      "name": "GetBooks",
+      "name": "get books",
       "event": [
         {
           "listen": "test",
@@ -176,26 +176,12 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{BaseUrl}}/books?genre=fiction&checkedOut=false&search=borges",
+          "raw": "{{BaseUrl}}/books",
           "host": [
             "{{BaseUrl}}"
           ],
           "path": [
             "books"
-          ],
-          "query": [
-            {
-              "key": "genre",
-              "value": "fiction"
-            },
-            {
-              "key": "checkedOut",
-              "value": "false"
-            },
-            {
-              "key": "search",
-              "value": "borges"
-            }
           ]
         }
       },
@@ -367,24 +353,32 @@
           }
         }
       ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
       "request": {
         "method": "GET",
         "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"title\": \"Carrie\",\r\n  \"author\": \"Stephen King\",\r\n  \"genre\": \"fiction\",\r\n  \"yearPublished\": 1974\r\n}"
+        },
         "url": {
-          "raw": "https://www.google.com/search?q=postman",
-          "protocol": "https",
+          "raw": "{{BaseUrl}}/books?genre=fiction&checkedOut=false",
           "host": [
-            "www",
-            "google",
-            "com"
+            "{{BaseUrl}}"
           ],
           "path": [
-            "search"
+            "books"
           ],
           "query": [
             {
-              "key": "q",
-              "value": "postman"
+              "key": "genre",
+              "value": "fiction"
+            },
+            {
+              "key": "checkedOut",
+              "value": "false"
             }
           ]
         }
