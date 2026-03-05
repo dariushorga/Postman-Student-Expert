@@ -1,0 +1,644 @@
+{
+  "info": {
+    "_postman_id": "6393c9dd-e7db-4380-9d1a-6c5643af6ee3",
+    "name": "Postman Library API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "11199761"
+  },
+  "item": [
+    {
+      "name": "GetBooks",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Visualization Script",
+              "// Visualization Script",
+              "",
+              "var template = `",
+              "<canvas id=\"myChart\" height=\"75\"></canvas>",
+              "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js\"></script>",
+              "<script>",
+              "    var ctx = document.getElementById(\"myChart\");",
+              "    var myChart = new Chart(ctx, {",
+              "        type: \"bar\",",
+              "        data: {",
+              "            labels: [],",
+              "            datasets: [{",
+              "                label: '',",
+              "                data: [],",
+              "                backgroundColor: 'rgba(54, 162, 235, 0.6)',",
+              "                borderColor: 'rgba(54, 162, 235, 1)',",
+              "                borderWidth: 1",
+              "            }]",
+              "        },",
+              "        options: {",
+              "            legend: { display: true },",
+              "            title: {",
+              "                display: true,",
+              "                text: ''",
+              "            },",
+              "            scales: {",
+              "                xAxes: [{",
+              "                    display: true,",
+              "                    scaleLabel: {",
+              "                        display: true,",
+              "                        labelString: ''",
+              "                    }",
+              "                }],",
+              "                yAxes: [{",
+              "                    display: true,",
+              "                    scaleLabel: {",
+              "                        display: true,",
+              "                        labelString: ''",
+              "                    },",
+              "                    ticks: {",
+              "                        beginAtZero: true",
+              "                    }",
+              "                }]",
+              "            }",
+              "        }",
+              "    });",
+              "",
+              "    pm.getData(function (err, value) {",
+              "        myChart.data.labels = value.labels;",
+              "        myChart.data.datasets[0].data = value.data;",
+              "        myChart.data.datasets[0].label = value.datasetLabel;",
+              "        myChart.options.title.text = value.chartTitle;",
+              "        myChart.options.scales.xAxes[0].scaleLabel.labelString = value.xLabel;",
+              "        myChart.options.scales.yAxes[0].scaleLabel.labelString = value.yLabel;",
+              "        myChart.update();",
+              "    });",
+              "</script>",
+              "`;",
+              "",
+              "function constructVisualizerPayload() {",
+              "    var html = pm.response.text();",
+              "    var labels = [];",
+              "    var data = [];",
+              "    var chartTitle = '';",
+              "    var datasetLabel = '';",
+              "    var xLabel = '';",
+              "    var yLabel = '';",
+              "    ",
+              "    // Extract h3 tags and their text content",
+              "    var h3Regex = /<h3[^>]*>([\\s\\S]*?)<\\/h3>/gi;",
+              "    var h3Matches = [];",
+              "    var match;",
+              "    ",
+              "    while ((match = h3Regex.exec(html)) !== null) {",
+              "        // Strip inner HTML tags to get text only",
+              "        var textContent = match[1].replace(/<[^>]*>/g, '').trim();",
+              "        if (textContent.length > 0) {",
+              "            h3Matches.push(textContent);",
+              "        }",
+              "    }",
+              "    ",
+              "    if (h3Matches.length >= 1) {",
+              "        // Use h3 tags - label is text (truncated), value is character length",
+              "        chartTitle = 'H3 Tag Text Lengths';",
+              "        datasetLabel = 'Character Count';",
+              "        xLabel = 'H3 Tags';",
+              "        yLabel = 'Length';",
+              "        ",
+              "        for (var i = 0; i < h3Matches.length; i++) {",
+              "            var text = h3Matches[i];",
+              "            var labelText = text.length > 30 ? text.substring(0, 27) + '...' : text;",
+              "            labels.push(labelText);",
+              "            data.push(text.length);",
+              "        }",
+              "    } else {",
+              "        // Fallback: count top 10 most common words",
+              "        chartTitle = 'Top 10 Most Common Words';",
+              "        datasetLabel = 'Word Count';",
+              "        xLabel = 'Words';",
+              "        yLabel = 'Frequency';",
+              "        ",
+              "        // Strip all HTML tags to get body text",
+              "        var bodyText = html.replace(/<script[\\s\\S]*?<\\/script>/gi, '');",
+              "        bodyText = bodyText.replace(/<style[\\s\\S]*?<\\/style>/gi, '');",
+              "        bodyText = bodyText.replace(/<[^>]*>/g, ' ');",
+              "        bodyText = bodyText.toLowerCase();",
+              "        ",
+              "        // Extract words (letters only, min 3 chars)",
+              "        var wordRegex = /[a-z]{3,}/g;",
+              "        var words = bodyText.match(wordRegex) || [];",
+              "        ",
+              "        // Count word frequencies",
+              "        var wordCounts = {};",
+              "        for (var j = 0; j < words.length; j++) {",
+              "            var word = words[j];",
+              "            if (wordCounts[word]) {",
+              "                wordCounts[word]++;",
+              "            } else {",
+              "                wordCounts[word] = 1;",
+              "            }",
+              "        }",
+              "        ",
+              "        // Convert to array and sort by count",
+              "        var wordArray = [];",
+              "        for (var w in wordCounts) {",
+              "            if (wordCounts.hasOwnProperty(w)) {",
+              "                wordArray.push({ word: w, count: wordCounts[w] });",
+              "            }",
+              "        }",
+              "        wordArray.sort(function(a, b) { return b.count - a.count; });",
+              "        ",
+              "        // Take top 10",
+              "        var top10 = wordArray.slice(0, 10);",
+              "        for (var k = 0; k < top10.length; k++) {",
+              "            labels.push(top10[k].word);",
+              "            data.push(top10[k].count);",
+              "        }",
+              "    }",
+              "    ",
+              "    return {",
+              "        labels: labels,",
+              "        data: data,",
+              "        chartTitle: chartTitle,",
+              "        datasetLabel: datasetLabel,",
+              "        xLabel: xLabel,",
+              "        yLabel: yLabel",
+              "    };",
+              "}",
+              "",
+              "pm.visualizer.set(template, constructVisualizerPayload());",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/books",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "books"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GetFictionBooks",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Visualization Script",
+              "// Visualization Script",
+              "",
+              "var template = `",
+              "<canvas id=\"myChart\" height=\"75\"></canvas>",
+              "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js\"></script>",
+              "<script>",
+              "    var ctx = document.getElementById(\"myChart\");",
+              "    var myChart = new Chart(ctx, {",
+              "        type: \"bar\",",
+              "        data: {",
+              "            labels: [],",
+              "            datasets: [{",
+              "                label: '',",
+              "                data: [],",
+              "                backgroundColor: 'rgba(54, 162, 235, 0.6)',",
+              "                borderColor: 'rgba(54, 162, 235, 1)',",
+              "                borderWidth: 1",
+              "            }]",
+              "        },",
+              "        options: {",
+              "            legend: { display: true },",
+              "            title: {",
+              "                display: true,",
+              "                text: ''",
+              "            },",
+              "            scales: {",
+              "                xAxes: [{",
+              "                    display: true,",
+              "                    scaleLabel: {",
+              "                        display: true,",
+              "                        labelString: ''",
+              "                    }",
+              "                }],",
+              "                yAxes: [{",
+              "                    display: true,",
+              "                    scaleLabel: {",
+              "                        display: true,",
+              "                        labelString: ''",
+              "                    },",
+              "                    ticks: {",
+              "                        beginAtZero: true",
+              "                    }",
+              "                }]",
+              "            }",
+              "        }",
+              "    });",
+              "",
+              "    pm.getData(function (err, value) {",
+              "        myChart.data.labels = value.labels;",
+              "        myChart.data.datasets[0].data = value.data;",
+              "        myChart.data.datasets[0].label = value.datasetLabel;",
+              "        myChart.options.title.text = value.chartTitle;",
+              "        myChart.options.scales.xAxes[0].scaleLabel.labelString = value.xLabel;",
+              "        myChart.options.scales.yAxes[0].scaleLabel.labelString = value.yLabel;",
+              "        myChart.update();",
+              "    });",
+              "</script>",
+              "`;",
+              "",
+              "function constructVisualizerPayload() {",
+              "    var html = pm.response.text();",
+              "    var labels = [];",
+              "    var data = [];",
+              "    var chartTitle = '';",
+              "    var datasetLabel = '';",
+              "    var xLabel = '';",
+              "    var yLabel = '';",
+              "    ",
+              "    // Extract h3 tags and their text content",
+              "    var h3Regex = /<h3[^>]*>([\\s\\S]*?)<\\/h3>/gi;",
+              "    var h3Matches = [];",
+              "    var match;",
+              "    ",
+              "    while ((match = h3Regex.exec(html)) !== null) {",
+              "        // Strip inner HTML tags to get text only",
+              "        var textContent = match[1].replace(/<[^>]*>/g, '').trim();",
+              "        if (textContent.length > 0) {",
+              "            h3Matches.push(textContent);",
+              "        }",
+              "    }",
+              "    ",
+              "    if (h3Matches.length >= 1) {",
+              "        // Use h3 tags - label is text (truncated), value is character length",
+              "        chartTitle = 'H3 Tag Text Lengths';",
+              "        datasetLabel = 'Character Count';",
+              "        xLabel = 'H3 Tags';",
+              "        yLabel = 'Length';",
+              "        ",
+              "        for (var i = 0; i < h3Matches.length; i++) {",
+              "            var text = h3Matches[i];",
+              "            var labelText = text.length > 30 ? text.substring(0, 27) + '...' : text;",
+              "            labels.push(labelText);",
+              "            data.push(text.length);",
+              "        }",
+              "    } else {",
+              "        // Fallback: count top 10 most common words",
+              "        chartTitle = 'Top 10 Most Common Words';",
+              "        datasetLabel = 'Word Count';",
+              "        xLabel = 'Words';",
+              "        yLabel = 'Frequency';",
+              "        ",
+              "        // Strip all HTML tags to get body text",
+              "        var bodyText = html.replace(/<script[\\s\\S]*?<\\/script>/gi, '');",
+              "        bodyText = bodyText.replace(/<style[\\s\\S]*?<\\/style>/gi, '');",
+              "        bodyText = bodyText.replace(/<[^>]*>/g, ' ');",
+              "        bodyText = bodyText.toLowerCase();",
+              "        ",
+              "        // Extract words (letters only, min 3 chars)",
+              "        var wordRegex = /[a-z]{3,}/g;",
+              "        var words = bodyText.match(wordRegex) || [];",
+              "        ",
+              "        // Count word frequencies",
+              "        var wordCounts = {};",
+              "        for (var j = 0; j < words.length; j++) {",
+              "            var word = words[j];",
+              "            if (wordCounts[word]) {",
+              "                wordCounts[word]++;",
+              "            } else {",
+              "                wordCounts[word] = 1;",
+              "            }",
+              "        }",
+              "        ",
+              "        // Convert to array and sort by count",
+              "        var wordArray = [];",
+              "        for (var w in wordCounts) {",
+              "            if (wordCounts.hasOwnProperty(w)) {",
+              "                wordArray.push({ word: w, count: wordCounts[w] });",
+              "            }",
+              "        }",
+              "        wordArray.sort(function(a, b) { return b.count - a.count; });",
+              "        ",
+              "        // Take top 10",
+              "        var top10 = wordArray.slice(0, 10);",
+              "        for (var k = 0; k < top10.length; k++) {",
+              "            labels.push(top10[k].word);",
+              "            data.push(top10[k].count);",
+              "        }",
+              "    }",
+              "    ",
+              "    return {",
+              "        labels: labels,",
+              "        data: data,",
+              "        chartTitle: chartTitle,",
+              "        datasetLabel: datasetLabel,",
+              "        xLabel: xLabel,",
+              "        yLabel: yLabel",
+              "    };",
+              "}",
+              "",
+              "pm.visualizer.set(template, constructVisualizerPayload());",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"title\": \"Carrie\",\r\n  \"author\": \"Stephen King\",\r\n  \"genre\": \"fiction\",\r\n  \"yearPublished\": 1974\r\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/books?genre=fiction&checkedOut=false",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "books"
+          ],
+          "query": [
+            {
+              "key": "genre",
+              "value": "fiction"
+            },
+            {
+              "key": "checkedOut",
+              "value": "false"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GetBooksById",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/books/:id",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "books",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "29cd820f-82f9-4b45-a7f4-0924111b5b89"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "AddBook",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// save the \"id\" value from the response to a variable named \"id\"\r",
+              "const id = pm.response.json().id;\r",
+              "// save the id as a collection variable named \"id\"\r",
+              "pm.collectionVariables.set(\"id\", id);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"title\": \"Carrie\",\r\n  \"author\": \"Stephen King\",\r\n  \"genre\": \"fiction\",\r\n  \"yearPublished\": 1974\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/books",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "books"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "CheckoutBook",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \r\n  \"checkedOut\": true \r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/books//:id",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "books",
+            "",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "{{id}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "DeleteBook",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/books/:id",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "books",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "{{id}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "skill check",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "pm.collectionVariables.set(\"favoriteActor\", response.json.actorName);\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "apikey",
+          "apikey": [
+            {
+              "key": "value",
+              "value": "skillcheck",
+              "type": "string"
+            },
+            {
+              "key": "key",
+              "value": "student-expert",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"actorName\": \"Edward Norton\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{skillcheckBaseUrl}}/post?movieName=Fight Club",
+          "host": [
+            "{{skillcheckBaseUrl}}"
+          ],
+          "path": [
+            "post"
+          ],
+          "query": [
+            {
+              "key": "movieName",
+              "value": "Fight Club"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "value",
+        "value": "postmanrulz",
+        "type": "string"
+      },
+      {
+        "key": "key",
+        "value": "api-key",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": ""
+    },
+    {
+      "key": "username",
+      "value": ""
+    },
+    {
+      "key": "owner",
+      "value": ""
+    },
+    {
+      "key": "repoName",
+      "value": ""
+    },
+    {
+      "key": "id",
+      "value": ""
+    },
+    {
+      "key": "skillcheckBaseUrl",
+      "value": ""
+    },
+    {
+      "key": "favoriteActor",
+      "value": ""
+    }
+  ]
+}
